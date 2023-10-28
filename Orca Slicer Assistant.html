@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Orca Slicer Assistant</title>
+  <style>
+    body {
+      background-color: #333;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    h1 {
+      color: #00a2ff;
+    }
+    h2 {
+      color: #00a2ff;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    select, input {
+      background-color: #444;
+      color: #fff;
+      border: none;
+      border-bottom: 2px solid #00a2ff;
+      padding: 5px;
+      font-size: 16px;
+    }
+    p {
+      color: #00a2ff;
+    }
+    .created-by {
+      margin-top: 20px;
+    }
+    .created-by p {
+      color: #888; /* Change the text color for the "Created by" paragraph */
+    }
+    .created-by a {
+      color: #00a2ff; /* Change the text color for the links */
+      text-decoration: underline; /* Underline the links */
+      margin: 0 5px; /* Add some spacing between links */
+    }
+  </style>
+</head>
+<body>
+  <h1>Orca Slicer Assistant</h1>
+
+  <h2>Pressure Advance</h2>
+  <label for="circle">Select Extruder Type:</label>
+  <select id="circle" onchange="calculate()">
+    <option value="DDE">DDE</option>
+    <option value="Bowden">Bowden</option>
+  </select>
+  <br>
+  <label for="entry1">PA Step (A):</label>
+  <input type="text" id="entry1" value="0.002" oninput="calculate()">
+  <br>
+  <label for="entry2">Measured Height (B):</label>
+  <input type="text" id="entry2" value="8" oninput="calculate()">
+  <br>
+  <p id="result">Output (DDE): ???</p>
+
+  <h2>Flow Rate</h2>
+  <label for="flowRate">Flow Ratio:</label>
+  <input type="text" id="flowRate" value="1.029" oninput="calculateFlowRate()">
+  <br>
+  <label for "modifier">Modifier:</label>
+  <input type="text" id="modifier" value="-6" oninput="calculateFlowRate()">
+  <br>
+  <p id="flowRateResult">Result: ???</p>
+
+  <h2>Retraction</h2>
+  <label for="start">Start:</label>
+  <input type="text" id="start" value="0.0" oninput="calculateRetraction()">
+  <br>
+  <label for="measuredHeight">Measured Height:</label>
+  <input type="text" id="measuredHeight" value="0.0" oninput="calculateRetraction()">
+  <br>
+  <label for="factor">Factor:</label>
+  <input type="text" id="factor" value="0.0" oninput="calculateRetraction()">
+  <br>
+  <p id="retractionResult">Result: ???</p>
+
+  <div class="created-by">
+    <p>Created by @StonedModder</p>
+    <a href="https://twitter.com/StonedModder" target="_blank">Twitter</a> |
+    <a href="https://github.com/ItsDeidara" target="_blank">Github</a>
+  </div>
+
+  <script>
+    function calculate() {
+      var circle = document.getElementById("circle").value;
+      var entry1 = parseFloat(document.getElementById("entry1").value);
+      var entry2 = parseFloat(document.getElementById("entry2").value);
+      var result = null;
+
+      if (circle === "DDE" || circle === "Bowden") {
+        result = entry1 * entry2;
+      }
+
+      if (result !== null) {
+        document.getElementById("result").textContent = "Output (" + circle + "): " + result.toFixed(3);
+      } else {
+        document.getElementById("result").textContent = "Invalid input";
+      }
+    }
+
+    function calculateFlowRate() {
+      var flowRate = parseFloat(document.getElementById("flowRate").value);
+      var modifier = parseFloat(document.getElementById("modifier").value);
+      var result = flowRate * (100 + modifier) / 100;
+
+      document.getElementById("flowRateResult").textContent = "Result: " + result.toFixed(5);
+    }
+
+    function calculateRetraction() {
+      var start = parseFloat(document.getElementById("start").value);
+      var measuredHeight = parseFloat(document.getElementById("measuredHeight").value);
+      var factor = parseFloat(document.getElementById("factor").value);
+      var result = start + measuredHeight * factor;
+
+      document.getElementById("retractionResult").textContent = "Result: " + result.toFixed(5);
+    }
+
+    calculate(); // Calculate initial values
+    calculateFlowRate(); // Calculate initial flow rate
+    calculateRetraction(); // Calculate initial retraction
+  </script>
+</body>
+</html>
