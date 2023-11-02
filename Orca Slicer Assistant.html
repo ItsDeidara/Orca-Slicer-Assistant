@@ -75,7 +75,7 @@
   <label for="entry1">PA Step (A):</label>
   <input type="text" id="entry1" value="0.002" oninput="calculate()">
   <br>
-  <label for "entry2">Measured Height (B):</label>
+  <label for="entry2">Measured Height (B):</label>
   <input type="text" id="entry2" value="8" oninput="calculate()">
   <br>
   <p id="result">Output (DDE): ???</p>
@@ -106,7 +106,7 @@
   <input type="text" id="factor" value="0.0" oninput="calculateRetraction()">
   <br>
   <p id="retractionResult">Result: ???</p>
-  <div class="history">
+  <div class "history">
     <div class="history-item" id="retraction-history">Last Result: N/A</div>
   </div>
 
@@ -139,15 +139,40 @@
     }
 
     function calculate() {
-      // Existing code for Pressure Advance calculation
+      var circle = document.getElementById("circle").value;
+      var entry1 = parseFloat(document.getElementById("entry1").value);
+      var entry2 = parseFloat(document.getElementById("entry2").value);
+      var result = null;
+
+      if (circle === "DDE" || circle === "Bowden") {
+        result = entry1 * entry2;
+      }
+
+      if (result !== null) {
+        document.getElementById("result").textContent = "Output (" + circle + "): " + result.toFixed(3);
+        updateHistory("pa-history", result.toFixed(3));
+      } else {
+        document.getElementById("result").textContent = "Invalid input";
+      }
     }
 
     function calculateFlowRate() {
-      // Existing code for Flow Rate calculation
+      var flowRate = parseFloat(document.getElementById("flowRate").value);
+      var modifier = parseFloat(document.getElementById("modifier").value);
+      var result = flowRate * (100 + modifier) / 100;
+
+      document.getElementById("flowRateResult").textContent = "Result: " + result.toFixed(5);
+      updateHistory("flow-history", result.toFixed(5));
     }
 
     function calculateRetraction() {
-      // Existing code for Retraction calculation
+      var start = parseFloat(document.getElementById("start").value);
+      var measuredHeight = parseFloat(document.getElementById("measuredHeight").value);
+      var factor = parseFloat(document.getElementById("factor").value);
+      var result = start + measuredHeight * factor;
+
+      document.getElementById("retractionResult").textContent = "Result: " + result.toFixed(5);
+      updateHistory("retraction-history", result.toFixed(5));
     }
 
     function calculateMaxSpeed() {
