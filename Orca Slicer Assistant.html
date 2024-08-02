@@ -179,7 +179,7 @@
       var maxSpeedStart = parseFloat(document.getElementById("maxSpeedStart").value);
       var maxSpeedHeight = parseFloat(document.getElementById("maxSpeedHeight").value);
       var maxSpeedStep = parseFloat(document.getElementById("maxSpeedStep").value);
-      var result = maxSpeedStart + (maxSpeedHeight - maxSpeedHeight * maxSpeedStep);
+      var result = maxSpeedStart + (maxSpeedHeight * maxSpeedStep);
 
       document.getElementById("maxSpeedResult").textContent = "Result: " + result.toFixed(2);
       updateHistory("max-speed-history", result.toFixed(2));
