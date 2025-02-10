@@ -166,7 +166,7 @@
     }
 
     function calculateRetraction() {
-      var start = parseFloat(document.getElementById("start").value.replace(",", "."));
+      var start = parseFloat(document.getElementById("start").value);
       var measuredHeight = parseFloat(document.getElementById("measuredHeight").value);
       var factor = parseFloat(document.getElementById("factor").value);
       var result = start + measuredHeight * factor;
