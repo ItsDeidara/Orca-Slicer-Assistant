@@ -73,10 +73,10 @@
   </select>
   <br>
   <label for="entry1">PA Step (A):</label>
-  <input type="text" id="entry1" value="0.002" oninput="calculate()">
+  <input type="number" id="entry1" value="0.002" oninput="calculate()">
   <br>
   <label for="entry2">Measured Height (B):</label>
-  <input type="text" id="entry2" value="8" oninput="calculate()">
+  <input type="number" id="entry2" value="8" oninput="calculate()">
   <br>
   <p id="result">Output (DDE): ???</p>
   <div class="history">
@@ -85,10 +85,10 @@
 
   <h2>Flow Rate</h2>
   <label for="flowRate">Flow Ratio:</label>
-  <input type="text" id="flowRate" value="1.029" oninput="calculateFlowRate()">
+  <input type="number" id="flowRate" value="1.029" oninput="calculateFlowRate()">
   <br>
   <label for="modifier">Modifier:</label>
-  <input type="text" id="modifier" value="-6" oninput="calculateFlowRate()">
+  <input type="number" id="modifier" value="-6" oninput="calculateFlowRate()">
   <br>
   <p id="flowRateResult">Result: ???</p>
   <div class="history">
@@ -97,13 +97,13 @@
 
   <h2>Retraction</h2>
   <label for="start">Start:</label>
-  <input type="text" id="start" value="0.0" oninput="calculateRetraction()">
+  <input type="number" id="start" value="0.0" oninput="calculateRetraction()">
   <br>
   <label for="measuredHeight">Measured Height:</label>
-  <input type="text" id="measuredHeight" value="0.0" oninput="calculateRetraction()">
+  <input type="number" id="measuredHeight" value="0.0" oninput="calculateRetraction()">
   <br>
   <label for="factor">Factor:</label>
-  <input type="text" id="factor" value="0.0" oninput="calculateRetraction()">
+  <input type="number" id="factor" value="0.0" oninput="calculateRetraction()">
   <br>
   <p id="retractionResult">Result: ???</p>
   <div class "history">
@@ -113,13 +113,13 @@
   <!-- New Max Volumetric Speed Section -->
   <h2>Max Volumetric Speed</h2>
   <label for="maxSpeedStart">Start:</label>
-  <input type="text" id="maxSpeedStart" value="15" oninput="calculateMaxSpeed()">
+  <input type="number" id="maxSpeedStart" value="15" oninput="calculateMaxSpeed()">
   <br>
   <label for="maxSpeedHeight">Measured Height:</label>
-  <input type="text" id="maxSpeedHeight" value="16" oninput="calculateMaxSpeed()">
+  <input type="number" id="maxSpeedHeight" value="16" oninput="calculateMaxSpeed()">
   <br>
   <label for="maxSpeedStep">Step:</label>
-  <input type="text" id="maxSpeedStep" value="0.5" oninput="calculateMaxSpeed()">
+  <input type="number" id="maxSpeedStep" value="0.5" oninput="calculateMaxSpeed()">
   <br>
   <p id="maxSpeedResult">Result: ???</p>
   <div class="history">
@@ -143,7 +143,8 @@
       var entry1 = parseFloat(document.getElementById("entry1").value);
       var entry2 = parseFloat(document.getElementById("entry2").value);
       var result = null;
-
+	  console.log(entry1)
+	  console.log(entry2)
       if (circle === "DDE" || circle === "Bowden") {
         result = entry1 * entry2;
       }
@@ -166,7 +167,7 @@
     }
 
     function calculateRetraction() {
-      var start = parseFloat(document.getElementById("start").value);
+      var start = parseFloat(document.getElementById("start").value.replace(",", "."));
       var measuredHeight = parseFloat(document.getElementById("measuredHeight").value);
       var factor = parseFloat(document.getElementById("factor").value);
       var result = start + measuredHeight * factor;
@@ -176,10 +177,14 @@
     }
 
     function calculateMaxSpeed() {
+		<!-- Start
       var maxSpeedStart = parseFloat(document.getElementById("maxSpeedStart").value);
+	   <!-- Measured height 
       var maxSpeedHeight = parseFloat(document.getElementById("maxSpeedHeight").value);
+	   <!-- step
       var maxSpeedStep = parseFloat(document.getElementById("maxSpeedStep").value);
-      var result = maxSpeedStart + (maxSpeedHeight - maxSpeedHeight * maxSpeedStep);
+	  <!-- start + (`height-measured` * step) there is no subtraction here. It is a - not a minus. 
+      var result = maxSpeedStart + (maxSpeedHeight * maxSpeedStep);
 
       document.getElementById("maxSpeedResult").textContent = "Result: " + result.toFixed(2);
       updateHistory("max-speed-history", result.toFixed(2));
