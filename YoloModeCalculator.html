@@ -1,0 +1,270 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO Mode Calculator - for OrcaSlicer</title>
+    <style>
+        :root {
+            --background-color: #000000;
+            --text-color: #ffffff;
+            --input-bg: #333333;
+            --input-text: #ffffff;
+            --button-bg: #ff9500;
+            --button-text: #ffffff;
+            --button-active: #d77800;
+            --container-bg: #1c1c1e;
+            --shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            --border-radius: 10px;
+            --link-color: #ff9500;
+        }
+
+        /* Light mode styles */
+        @media (prefers-color-scheme: light) {
+            :root {
+                --background-color: #ffffff;
+                --text-color: #000000;
+                --input-bg: #f0f0f0;
+                --input-text: #000000;
+                --button-bg: #007aff;
+                --button-text: #ffffff;
+                --button-active: #005bb5;
+                --container-bg: #ffffff;
+                --shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+                --link-color: #007aff;
+            }
+        }
+
+        /* Apply dark mode if data-theme="dark" */
+        html[data-theme="dark"] {
+            --background-color: #000000;
+            --text-color: #ffffff;
+            --input-bg: #333333;
+            --input-text: #ffffff;
+            --button-bg: #ff9500;
+            --button-active: #d77800;
+            --container-bg: #1c1c1e;
+            --shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            --link-color: #ff9500;
+        }
+
+        /* Apply light mode if data-theme="light" */
+        html[data-theme="light"] {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --input-bg: #f0f0f0;
+            --input-text: #000000;
+            --button-bg: #007aff;
+            --button-active: #005bb5;
+            --container-bg: #ffffff;
+            --shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            --link-color: #007aff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+        }
+
+        .calculator {
+            background-color: var(--container-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.2em;
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            border: none;
+            border-radius: var(--border-radius);
+            text-align: right;
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 1.4em;
+            text-align: center;
+            padding: 10px;
+            background-color: var(--input-bg);
+            border-radius: var(--border-radius);
+        }
+
+        .footer {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        .footer a {
+            color: var(--link-color);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--button-bg);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle::before {
+            content: '🌙';
+            font-size: 1.5em;
+        }
+
+        html[data-theme="light"] .theme-toggle::before {
+            content: '☀️';
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()"></button>
+    <div class="calculator">
+        <h1>YOLO Mode Calculator - for OrcaSlicer</h1>
+        <div class="input-group">
+            <label for="flowRatioOld">FlowRatio_old</label>
+            <input type="number" step="0.01" id="flowRatioOld" value="0.98" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label for="modifier">Modifier</label>
+            <input type="number" step="0.01" id="modifier" value="0.04" oninput="calculate()">
+        </div>
+        <div class="result" id="result">FlowRatio_new: 1.020</div>
+        <div class="footer">
+            Created by <a href="https://x.com/StonedModder" target="_blank">StonedModder</a>. 
+            <a href="https://x.com/StonedModder" target="_blank">Report bugs</a>.
+        </div>
+    </div>
+
+    <script>
+        // Load theme from localStorage or system preference
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        }
+
+        // Toggle theme and save to localStorage
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Real-time calculation
+        function calculate() {
+            const flowRatioOld = parseFloat(document.getElementById('flowRatioOld').value) || 0;
+            const modifier = parseFloat(document.getElementById('modifier').value) || 0;
+            const flowRatioNew = flowRatioOld + modifier;
+            document.getElementById('result').textContent = `FlowRatio_new: ${flowRatioNew.toFixed(3)}`;
+        }
+
+        // Initialize theme and calculate default values on page load
+        loadTheme();
+        calculate();
+
+        // Listen for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+                document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+            }
+        });
+    </script>
+</body>
+</html>
