@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orca Slicer AIO Configuration Assistant</title>
+    <style>
+        :root {
+            --main-color: #ff0000;
+            --main-gradient: linear-gradient(90deg, #ff2a2a 0%, #ff0000 100%);
+            --background-color: #18191c;
+            --card-bg: #232326;
+            --text-color: #fff;
+            --input-bg: #2c2c2e;
+            --input-text: #fff;
+            --button-bg: var(--main-color);
+            --button-text: #fff;
+            --button-active: #b30000;
+            --shadow: 0px 4px 16px rgba(0,0,0,0.25);
+            --border-radius: 16px;
+            --section-title-size: 1.15em;
+            --section-title-weight: 700;
+            --link-color: #fff;
+        }
+        html[data-theme="light"] {
+            --main-color: #ff0000;
+            --main-gradient: linear-gradient(90deg, #ff2a2a 0%, #ff0000 100%);
+            --background-color: #f5f5f7;
+            --card-bg: #fff;
+            --text-color: #222;
+            --input-bg: #f0f0f0;
+            --input-text: #222;
+            --button-bg: #ff0000;
+            --button-text: #fff;
+            --button-active: #b30000;
+            --shadow: 0px 4px 16px rgba(0,0,0,0.08);
+            --border-radius: 16px;
+            --section-title-size: 1.15em;
+            --section-title-weight: 700;
+            --link-color: #ff0000;
+        }
+        body {
+            background: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .header {
+            background: var(--main-gradient);
+            color: #fff;
+            padding: 18px 0 12px 0;
+            text-align: center;
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+            position: relative;
+        }
+        .header-title {
+            font-size: 2em;
+            font-weight: 800;
+            margin-bottom: 0.15em;
+            letter-spacing: 0.01em;
+        }
+        .header-subtitle {
+            font-size: 1em;
+            font-weight: 400;
+            color: #fff;
+            opacity: 0.92;
+        }
+        .header-subtitle a {
+            color: #fff;
+            text-decoration: underline;
+            font-weight: 700;
+        }
+        .theme-toggle {
+            position: absolute;
+            top: 14px;
+            right: 24px;
+            background: rgba(255,255,255,0.12);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: background 0.2s;
+        }
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.22);
+        }
+        .theme-toggle::before {
+            content: '🌙';
+            font-size: 1.3em;
+        }
+        html[data-theme="light"] .theme-toggle::before {
+            content: '☀️';
+        }
+        .assistant-container {
+            max-width: 1000px;
+            margin: -24px auto 0 auto;
+            padding: 0 16px 32px 16px;
+        }
+        .grid-padding {
+            height: 64px;
+        }
+        .grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: flex-start;
+        }
+        .card-section {
+            width: 48%;
+            min-width: 320px;
+            max-width: 100%;
+            box-sizing: border-box;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            display: block;
+        }
+        .card-header {
+            cursor: pointer;
+            font-size: var(--section-title-size);
+            font-weight: var(--section-title-weight);
+            color: var(--main-color);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            user-select: none;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            background: none;
+            transition: background 0.2s;
+        }
+        .chevron {
+            display: inline-block;
+            margin-right: 10px;
+            transition: transform 0.2s;
+            font-size: 1.2em;
+        }
+        .card-section.closed .chevron {
+            transform: rotate(0deg);
+        }
+        .card-section.open .chevron {
+            transform: rotate(90deg);
+        }
+        .card-content {
+            padding: 18px 20px 12px 20px;
+            display: block;
+            max-height: 2000px;
+            opacity: 1;
+            transition: max-height 0.3s cubic-bezier(.4,0,.2,1), opacity 0.2s;
+            overflow: hidden;
+        }
+        .card-section.closed .card-content {
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        @media (max-width: 900px) {
+            .grid {
+                flex-direction: column;
+            }
+            .card-section {
+                width: 100%;
+                min-width: 0;
+                margin-bottom: 24px;
+            }
+        }
+        label {
+            display: block;
+            font-size: 1em;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+            background: var(--input-bg);
+            color: var(--input-text);
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            font-weight: 500;
+        }
+        input:focus, select:focus {
+            outline: 2px solid var(--main-color);
+        }
+        .result {
+            margin-top: 10px;
+            font-size: 1.15em;
+            color: var(--main-color);
+            font-weight: 700;
+            background: rgba(255,0,0,0.08);
+            border-radius: 8px;
+            padding: 10px 0 10px 12px;
+        }
+        .history-item {
+            color: #fff;
+            background: rgba(255,0,0,0.12);
+            border-radius: 8px;
+            font-size: 0.98em;
+            margin-top: 8px;
+            padding: 6px 0 6px 12px;
+        }
+        .badge-new {
+            background: var(--main-color);
+            color: #fff;
+            font-size: 0.8em;
+            border-radius: 6px;
+            padding: 2px 8px;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        .emoji {
+            margin-right: 8px;
+        }
+        .footer {
+            margin-top: 32px;
+            text-align: center;
+            font-size: 0.98em;
+            color: #fff;
+            opacity: 0.7;
+        }
+        .footer a {
+            color: var(--link-color);
+            text-decoration: underline;
+            margin: 0 8px;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-title">Orca Slicer AIO</div>
+        <div class="header-subtitle">Calibration Assistant for the <a href="https://github.com/SoftFever/OrcaSlicer/wiki/Calibration" target="_blank">Orca Slicer Wiki</a></div>
+        <button class="theme-toggle" onclick="toggleTheme()"></button>
+    </div>
+    <div class="assistant-container">
+        <div class="grid-padding"></div>
+        <div class="grid">
+            <div class="card-section open" id="card-pa">
+                <div class="card-header" onclick="toggleCard('pa')"><span class="chevron">▶</span><span class="emoji">⚡</span>Pressure Advance</div>
+                <div class="card-content">
+                    <label for="circle">Select Extruder Type:</label>
+                    <select id="circle" onchange="calculatePA()">
+                        <option value="DDE">DDE</option>
+                        <option value="Bowden">Bowden</option>
+                    </select>
+                    <label for="entry1">PA Step (A):</label>
+                    <input type="number" id="entry1" value="0.002" oninput="calculatePA()">
+                    <label for="entry2">Measured Height (B):</label>
+                    <input type="number" id="entry2" value="8" oninput="calculatePA()">
+                    <div class="result" id="pa-result">Output (DDE): ???</div>
+                    <div class="history-item" id="pa-history">Last Result: N/A</div>
+                </div>
+            </div>
+            <div class="card-section open" id="card-flow">
+                <div class="card-header" onclick="toggleCard('flow')"><span class="chevron">▶</span><span class="emoji">💧</span>Flow Rate</div>
+                <div class="card-content">
+                    <label for="flowRate">Flow Ratio:</label>
+                    <input type="number" id="flowRate" value="1.029" oninput="calculateFlowRate()">
+                    <label for="flowModifier">Modifier:</label>
+                    <input type="number" id="flowModifier" value="-6" oninput="calculateFlowRate()">
+                    <div class="result" id="flowRateResult">Result: ???</div>
+                    <div class="history-item" id="flow-history">Last Result: N/A</div>
+                </div>
+            </div>
+            <div class="card-section open" id="card-retraction">
+                <div class="card-header" onclick="toggleCard('retraction')"><span class="chevron">▶</span><span class="emoji">🔄</span>Retraction</div>
+                <div class="card-content">
+                    <label for="start">Start:</label>
+                    <input type="number" id="start" value="0.0" oninput="calculateRetraction()">
+                    <label for="measuredHeight">Measured Height:</label>
+                    <input type="number" id="measuredHeight" value="0.0" oninput="calculateRetraction()">
+                    <label for="factor">Factor:</label>
+                    <input type="number" id="factor" value="0.0" oninput="calculateRetraction()">
+                    <div class="result" id="retractionResult">Result: ???</div>
+                    <div class="history-item" id="retraction-history">Last Result: N/A</div>
+                </div>
+            </div>
+            <div class="card-section open" id="card-maxspeed">
+                <div class="card-header" onclick="toggleCard('maxspeed')"><span class="chevron">▶</span><span class="emoji">🚀</span>Max Volumetric Speed</div>
+                <div class="card-content">
+                    <label for="maxSpeedStart">Start:</label>
+                    <input type="number" id="maxSpeedStart" value="15" oninput="calculateMaxSpeed()">
+                    <label for="maxSpeedHeight">Measured Height:</label>
+                    <input type="number" id="maxSpeedHeight" value="16" oninput="calculateMaxSpeed()">
+                    <label for="maxSpeedStep">Step:</label>
+                    <input type="number" id="maxSpeedStep" value="0.5" oninput="calculateMaxSpeed()">
+                    <div class="result" id="maxSpeedResult">Result: ???</div>
+                    <div class="history-item" id="max-speed-history">Last Result: N/A</div>
+                </div>
+            </div>
+            <div class="card-section open" id="card-yolo">
+                <div class="card-header" onclick="toggleCard('yolo')"><span class="chevron">▶</span><span class="emoji">🌟</span>YOLO Mode <span class="badge-new">NEW</span></div>
+                <div class="card-content">
+                    <label for="flowRatioOld">FlowRatio_old:</label>
+                    <input type="number" step="0.01" id="flowRatioOld" value="0.98" oninput="calculateYOLO()">
+                    <label for="yoloModifier">Modifier:</label>
+                    <input type="number" step="0.01" id="yoloModifier" value="0.04" oninput="calculateYOLO()">
+                    <div class="result" id="yoloResult">FlowRatio_new: 1.020</div>
+                    <div class="history-item" id="yolo-history">Last Result: 1.020</div>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            Created by <a href="https://x.com/StonedModder" target="_blank">StonedModder</a> |
+            <a href="https://github.com/ItsDeidara" target="_blank">GitHub</a>
+        </div>
+    </div>
+    <script>
+        // Theme logic
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        }
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+                document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+            }
+        });
+        // Calculator logic
+        function updateHistory(id, value) {
+            const historyItem = document.getElementById(id);
+            if (historyItem) historyItem.textContent = "Last Result: " + value;
+        }
+        function calculatePA() {
+            var circle = document.getElementById("circle").value;
+            var entry1 = parseFloat(document.getElementById("entry1").value);
+            var entry2 = parseFloat(document.getElementById("entry2").value);
+            var result = null;
+            if (circle === "DDE" || circle === "Bowden") {
+                result = entry1 * entry2;
+            }
+            if (result !== null) {
+                document.getElementById("pa-result").textContent = "Output (" + circle + "): " + result.toFixed(3);
+                updateHistory("pa-history", result.toFixed(3));
+            } else {
+                document.getElementById("pa-result").textContent = "Invalid input";
+            }
+        }
+        function calculateFlowRate() {
+            var flowRate = parseFloat(document.getElementById("flowRate").value);
+            var modifier = parseFloat(document.getElementById("flowModifier").value);
+            var result = flowRate * (100 + modifier) / 100;
+            document.getElementById("flowRateResult").textContent = "Result: " + result.toFixed(5);
+            updateHistory("flow-history", result.toFixed(5));
+        }
+        function calculateRetraction() {
+            var start = parseFloat(document.getElementById("start").value);
+            var measuredHeight = parseFloat(document.getElementById("measuredHeight").value);
+            var factor = parseFloat(document.getElementById("factor").value);
+            var result = start + measuredHeight * factor;
+            document.getElementById("retractionResult").textContent = "Result: " + result.toFixed(5);
+            updateHistory("retraction-history", result.toFixed(5));
+        }
+        function calculateMaxSpeed() {
+            var maxSpeedStart = parseFloat(document.getElementById("maxSpeedStart").value);
+            var maxSpeedHeight = parseFloat(document.getElementById("maxSpeedHeight").value);
+            var maxSpeedStep = parseFloat(document.getElementById("maxSpeedStep").value);
+            var result = maxSpeedStart + (maxSpeedHeight * maxSpeedStep);
+            document.getElementById("maxSpeedResult").textContent = "Result: " + result.toFixed(2);
+            updateHistory("max-speed-history", result.toFixed(2));
+        }
+        function calculateYOLO() {
+            const flowRatioOld = parseFloat(document.getElementById('flowRatioOld').value) || 0;
+            const modifier = parseFloat(document.getElementById('yoloModifier').value) || 0;
+            const flowRatioNew = flowRatioOld + modifier;
+            document.getElementById('yoloResult').textContent = `FlowRatio_new: ${flowRatioNew.toFixed(3)}`;
+            updateHistory('yolo-history', flowRatioNew.toFixed(3));
+        }
+
+        // Expand/collapse logic for cards
+        function toggleCard(card) {
+            // Only toggle the clicked card
+            var cardDiv = document.getElementById('card-' + card);
+            if (!cardDiv) return;
+            var isOpen = cardDiv.classList.contains('open');
+            if (isOpen) {
+                cardDiv.classList.remove('open');
+                cardDiv.classList.add('closed');
+            } else {
+                cardDiv.classList.add('open');
+                cardDiv.classList.remove('closed');
+            }
+        }
+
+        // Initialize all calculators and set all cards open on load
+        window.onload = function() {
+            loadTheme();
+            calculatePA();
+            calculateFlowRate();
+            calculateRetraction();
+            calculateMaxSpeed();
+            calculateYOLO();
+            // Ensure all cards are open on load
+            ['pa','flow','retraction','maxspeed','yolo'].forEach(function(card) {
+                var cardDiv = document.getElementById('card-' + card);
+                if (cardDiv) {
+                    cardDiv.classList.add('open');
+                    cardDiv.classList.remove('closed');
+                }
+            });
+        };
+    </script>
+</body>
+</html>
