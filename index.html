@@ -85,6 +85,12 @@
             transition: background 0.2s;
             box-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
         }
+        @media (width < 512px) {
+            .theme-toggle {
+                top: 12px;
+                right: 12px;
+            }
+        }
         .theme-toggle:hover {
             background: rgba(255,255,255,0.22);
             box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 4px 0px inset;
@@ -170,6 +176,10 @@
             .card-section {
                 width: 100%;
                 min-width: 0;
+            }
+            .card-section.open {
+                height: min-content;
+                padding-bottom: 0.7rem;
             }
         }
         label {
