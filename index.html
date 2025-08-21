@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orca Slicer AIO Configuration Assistant</title>
+    <title>OrcaSlicer AIO</title>
     <style>
         :root {
             --main-color: #009789;
@@ -11,11 +11,11 @@
             --main-gradient: linear-gradient(90deg, var(--secondary-color) 0%, var(--main-color) 100%);
             --background-color: #18191c;
             --card-bg: #232326;
+            --card-outline: var(--secondary-color);
             --text-color: #fff;
             --card-text-color: #fff;
             --input-bg: #2c2c2e;
             --input-text: #fff;
-            --button-bg: var(--secondary-color);
             --button-text: #fff;
             --button-active: var(--main-color);
             --shadow: 0px 4px 16px rgba(0,0,0,0.25);
@@ -27,6 +27,7 @@
         html[data-theme="light"] {
             --background-color: #f5f5f7;
             --card-bg: #fff;
+            --card-outline: var(--main-color);
             --text-color: #222;
             --card-text-color: #515151;
             --input-bg: #f0f0f0;
@@ -44,7 +45,7 @@
         .header {
             background: var(--main-gradient);
             color: #fff;
-            padding: 18px 0 12px 0;
+            padding: 16px 0 16px 0;
             text-align: center;
             border-top-left-radius: var(--border-radius);
             border-top-right-radius: var(--border-radius);
@@ -84,6 +85,12 @@
             z-index: 10;
             transition: background 0.2s;
             box-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+        }
+        @media (width < 512px) {
+            .theme-toggle {
+                top: 12px;
+                right: 12px;
+            }
         }
         .theme-toggle:hover {
             background: rgba(255,255,255,0.22);
@@ -161,7 +168,7 @@
             padding-bottom: 0;
         }
         .card-active {
-            border: 2px var(--secondary-color) solid;
+            border: 2px var(--card-outline) solid;
         }
         @media (width < 760px) {
             .grid {
@@ -170,6 +177,10 @@
             .card-section {
                 width: 100%;
                 min-width: 0;
+            }
+            .card-section.open {
+                height: min-content;
+                padding-bottom: 0.7rem;
             }
         }
         label {
@@ -245,8 +256,8 @@
 </head>
 <body>
     <div class="header">
-        <div class="header-title">Orca Slicer AIO</div>
-        <div class="header-subtitle">Calibration Assistant for the <a href="https://github.com/SoftFever/OrcaSlicer/wiki/Calibration" target="_blank">Orca Slicer Wiki</a></div>
+        <div class="header-title">OrcaSlicer AIO</div>
+        <div class="header-subtitle">Calibration Assistant for the <a href="https://github.com/SoftFever/OrcaSlicer/wiki/Calibration" target="_blank">OrcaSlicer Wiki</a></div>
         <button class="theme-toggle" onclick="toggleTheme()"></button>
     </div>
     <div class="assistant-container">
